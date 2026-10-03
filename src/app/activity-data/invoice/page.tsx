@@ -61,7 +61,7 @@ function readExtraction(doc: any) {
 
 export default function InvoiceUploadPage() {
   const router = useRouter();
-  const { activePeriodId, status: periodStatus, isPeriodReady } =
+  const { activePeriodId, activePeriod, isLocked, status: periodStatus, isPeriodReady } =
     useReportingPeriodContext();
 
   const [stage, setStage] = useState<Stage>("upload");
@@ -257,6 +257,13 @@ export default function InvoiceUploadPage() {
     }
     if (!activePeriodId) {
       setError("No reporting period selected.");
+      return;
+    }
+    if (isLocked) {
+      setError(
+        `The current reporting period "${activePeriod?.name ?? activePeriodId}" is locked. ` +
+        `Unlock it first under Reporting Periods before adding new activity data.`
+      );
       return;
     }
 
