@@ -27,6 +27,7 @@ export default function SignUpPage() {
 
     const formData = new FormData(e.currentTarget);
     const name = String(formData.get('name') || '').trim();
+    const org = String(formData.get('org') || '').trim();
     const email = String(formData.get('email') || '').trim();
     const password = String(formData.get('password') || '');
     const confirm = String(formData.get('confirm') || '');
@@ -43,7 +44,7 @@ export default function SignUpPage() {
     }
 
     try {
-      const res = await register({ username: name, email, password });
+      const res = await register({ name, email, password, organizationName: org || name + "'s Organization" });
       if (!res.success || !res.data?.token) {
         setError(res.message || 'Registration failed. Please try again.');
         setIsPending(false);
@@ -156,6 +157,16 @@ export default function SignUpPage() {
 
             {/* Email */}
             <div className="space-y-1.5">
+              <label htmlFor="org" className="block text-xs font-semibold text-slate-800">Organization Name</label>
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 text-slate-400 pointer-events-none"><User className="size-4" /></span>
+                <input id="org" name="org" type="text" placeholder="My University / Company (optional)"
+                  className="h-10 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15" />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div className="space-y-1.5">
               <label htmlFor="email" className="block text-xs font-semibold text-slate-800">Work Email</label>
               <div className="relative flex items-center">
                 <span className="absolute left-3.5 text-slate-400 pointer-events-none"><Mail className="size-4" /></span>
@@ -163,6 +174,7 @@ export default function SignUpPage() {
                   className="h-10 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15" />
               </div>
             </div>
+
 
             {/* Password */}
             <div className="space-y-1.5">

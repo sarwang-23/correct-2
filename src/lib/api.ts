@@ -741,7 +741,7 @@ export async function logoutSession(): Promise<void> {
   await requestJson('/auth/logout', { method: 'POST' }).catch(() => {});
 }
 
-export async function register(payload: { username: string; email: string; password: string; tenantId?: string }): Promise<AuthResponse> {
+export async function register(payload: { name: string; email: string; password: string; organizationName?: string }): Promise<AuthResponse> {
   const { ok, status, data } = await requestJson('/auth/register', {
     method: 'POST',
     body: JSON.stringify(payload),
