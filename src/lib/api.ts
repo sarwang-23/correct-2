@@ -1,4 +1,4 @@
-﻿import type { OnboardingData } from "@/app/onboarding/_types/onboarding";
+import type { OnboardingData } from "@/app/onboarding/_types/onboarding";
 
 /**
  * Backend API base URL. Required in every environment â€” there is deliberately
@@ -73,9 +73,19 @@ function extractApiErrorMessage(data: unknown, fallback: string): string {
     error?: unknown;
     message?: unknown;
     details?: unknown;
+    data?: unknown;
   };
 
   const parts: string[] = [];
+
+  // NestJS class-validator returns message as an array of strings
+  if (Array.isArray(payload.message) && payload.message.length > 0) {
+    const msgs = (payload.message as unknown[]).filter(
+      (m): m is string => typeof m === "string" && m.trim().length > 0
+    );
+    if (msgs.length > 0) parts.push(msgs.join("; "));
+  }
+
   if (typeof payload.error === "string" && payload.error.trim()) {
     parts.push(payload.error);
   }
@@ -98,7 +108,15 @@ function extractApiErrorMessage(data: unknown, fallback: string): string {
     if (typeof payload.message === "string" && payload.message.trim()) {
       parts.push(payload.message);
     } else {
-      parts.push(fallback);
+      // Try message nested inside a `data` envelope
+      const nested = (payload.data ?? {}) as { message?: unknown; error?: unknown };
+      if (typeof nested.message === "string" && nested.message.trim()) {
+        parts.push(nested.message);
+      } else if (typeof nested.error === "string" && nested.error.trim()) {
+        parts.push(nested.error);
+      } else {
+        parts.push(fallback);
+      }
     }
   }
   return parts.join(" | ");

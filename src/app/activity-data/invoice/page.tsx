@@ -245,6 +245,16 @@ export default function InvoiceUploadPage() {
       setError("Please select an activity date.");
       return;
     }
+    // Warn if the date is more than 1 year in the future — OCR often misreads years
+    const parsedDate = new Date(form.activityDate);
+    const oneYearFromNow = new Date();
+    oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+    if (parsedDate > oneYearFromNow) {
+      setError(
+        `Activity date ${form.activityDate} appears to be in the future — OCR may have misread the year. Please correct it to a date within your reporting period.`
+      );
+      return;
+    }
     if (!activePeriodId) {
       setError("No reporting period selected.");
       return;
