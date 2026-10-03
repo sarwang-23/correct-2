@@ -380,14 +380,26 @@ export default function InvoiceUploadPage() {
 
           {/* Locked-period warning shown on the review stage */}
           {isLocked && stage === "review" && (
-            <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-              <Warning size={18} className="text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-800">
-                <strong>Reporting period is locked.</strong> You cannot add new activity data to a locked period.
-                Please go to <strong>Reporting Periods</strong> and open or create a new period first.
-              </p>
+            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-4">
+              <div className="flex items-start gap-3">
+                <Warning size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-amber-800">Reporting Period is Locked</p>
+                  <p className="text-sm text-amber-700 mt-1">
+                    You cannot save activity data to a locked reporting period.
+                    Open an existing period or create a new one, then come back to upload again.
+                  </p>
+                  <button
+                    onClick={() => router.push("/reporting-periods")}
+                    className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700 transition-colors"
+                  >
+                    Go to Reporting Periods →
+                  </button>
+                </div>
+              </div>
             </div>
           )}
+
 
           {error && (
             <div className="mb-4 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
