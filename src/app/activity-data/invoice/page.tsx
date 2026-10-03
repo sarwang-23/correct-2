@@ -278,7 +278,7 @@ export default function InvoiceUploadPage() {
         activityDate: new Date(form.activityDate).toISOString(),
         description: form.description,
         inputSource: "INVOICE",
-        status: "SUBMITTED",
+        status: "DRAFT",
         reportingPeriodId: activePeriodId,
         documentId,
       });

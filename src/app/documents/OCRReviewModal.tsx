@@ -76,7 +76,7 @@ export default function OCRReviewModal({ document, onClose, onSuccess }: OCRRevi
         activityDate: new Date(formData.activityDate).toISOString(),
         description: formData.description,
         inputSource: "INVOICE",
-        status: "SUBMITTED",
+        status: "DRAFT",
         reportingPeriodId: activePeriodId,
       };
 
