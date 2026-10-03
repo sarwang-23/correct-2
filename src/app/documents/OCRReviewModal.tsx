@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { X, CheckCircle, Robot, FileText } from "@phosphor-icons/react";
 import { EASE } from "@/lib/animations";
-import { createActivityData, submitActivityData } from "@/lib/api";
+import { createActivityData, fetchAPI, submitActivityData } from "@/lib/api";
 import { useReportingPeriodContext } from "@/context/ReportingPeriodContext";
 import { toast } from "sonner";
 
@@ -33,7 +33,25 @@ function readExtraction(doc: any) {
 export default function OCRReviewModal({ document, onClose, onSuccess }: OCRReviewModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [physicalEntityId, setPhysicalEntityId] = useState<string | null>(null);
   const { activePeriodId } = useReportingPeriodContext();
+
+  useEffect(() => {
+    async function loadCampus() {
+      try {
+        const res = await fetchAPI("/onboarding/hierarchy");
+        const campuses = res?.data?.campuses ?? res?.campuses ?? [];
+        if (campuses.length > 0) { setPhysicalEntityId(campuses[0].id); return; }
+      } catch { /* ignore */ }
+      try {
+        const uId = typeof window !== 'undefined' ? localStorage.getItem('universityId') ?? '' : '';
+        const res2 = await fetchAPI(`/campuses?universityId=${uId}`);
+        const list = res2?.data ?? [];
+        if (list.length > 0) setPhysicalEntityId(list[0].id);
+      } catch { /* ignore */ }
+    }
+    loadCampus();
+  }, []);
 
   const extraction = readExtraction(document) ?? {};
   const matchedCategory = CATEGORY_OPTIONS.find(
@@ -83,6 +101,8 @@ export default function OCRReviewModal({ document, onClose, onSuccess }: OCRRevi
       const res = await createActivityData({
         ...payload,
         documentId: document.id,
+        status: "SUBMITTED",
+        ...(physicalEntityId ? { physicalEntityId } : {}),
       });
       const activityId = res?.data?.id ?? res?.id;
       if (!activityId) {

@@ -18,6 +18,7 @@ import Topbar from "@/components/dashboard/Topbar";
 import { useReportingPeriodContext } from "@/context/ReportingPeriodContext";
 import {
   createActivityData,
+  fetchAPI,
   getDocumentById,
   ocrDocument,
   requestOcr,
@@ -84,6 +85,29 @@ export default function InvoiceUploadPage() {
 
   const fileRef = useRef<HTMLInputElement>(null);
   const cancelledRef = useRef(false);
+  const [defaultPhysicalEntityId, setDefaultPhysicalEntityId] = useState<string | null>(null);
+
+  // Auto-fetch the first campus so we can include physicalEntityId in the
+  // activity payload — the backend requires it and returns 403 without it.
+  useEffect(() => {
+    async function loadCampus() {
+      try {
+        const res = await fetchAPI("/onboarding/hierarchy");
+        const campuses = res?.data?.campuses ?? res?.campuses ?? [];
+        if (campuses.length > 0) {
+          setDefaultPhysicalEntityId(campuses[0].id);
+          return;
+        }
+      } catch { /* ignore */ }
+      // Fallback: try /campuses endpoint directly
+      try {
+        const res2 = await fetchAPI(`/campuses?universityId=${localStorage.getItem("universityId") ?? ""}`);
+        const list = res2?.data ?? [];
+        if (list.length > 0) setDefaultPhysicalEntityId(list[0].id);
+      } catch { /* ignore */ }
+    }
+    loadCampus();
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -278,9 +302,10 @@ export default function InvoiceUploadPage() {
         activityDate: new Date(form.activityDate).toISOString(),
         description: form.description,
         inputSource: "INVOICE",
-        status: "DRAFT",
+        status: "SUBMITTED",
         reportingPeriodId: activePeriodId,
         documentId,
+        ...(defaultPhysicalEntityId ? { physicalEntityId: defaultPhysicalEntityId } : {}),
       });
 
       const activityId = res?.data?.id ?? res?.id;
