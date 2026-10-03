@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { X, CheckCircle, Robot, FileText } from "@phosphor-icons/react";
 import { EASE } from "@/lib/animations";
-import { createActivityFromDocument, submitActivityData } from "@/lib/api";
+import { createActivityData, submitActivityData } from "@/lib/api";
 import { useReportingPeriodContext } from "@/context/ReportingPeriodContext";
 import { toast } from "sonner";
 
@@ -80,7 +80,10 @@ export default function OCRReviewModal({ document, onClose, onSuccess }: OCRRevi
         reportingPeriodId: activePeriodId,
       };
 
-      const res = await createActivityFromDocument(document.id, payload);
+      const res = await createActivityData({
+        ...payload,
+        documentId: document.id,
+      });
       const activityId = res?.data?.id ?? res?.id;
       if (!activityId) {
         throw new Error(res?.message || "Failed to create activity");

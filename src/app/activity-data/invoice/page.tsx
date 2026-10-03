@@ -17,7 +17,7 @@ import {
 import Topbar from "@/components/dashboard/Topbar";
 import { useReportingPeriodContext } from "@/context/ReportingPeriodContext";
 import {
-  createActivityFromDocument,
+  createActivityData,
   getDocumentById,
   ocrDocument,
   requestOcr,
@@ -253,7 +253,7 @@ export default function InvoiceUploadPage() {
     setSaving(true);
     setError("");
     try {
-      const res = await createActivityFromDocument(documentId, {
+      const res = await createActivityData({
         category: form.category,
         scope: form.scope,
         quantity: Number(form.quantity),
@@ -263,6 +263,7 @@ export default function InvoiceUploadPage() {
         inputSource: "INVOICE",
         status: "SUBMITTED",
         reportingPeriodId: activePeriodId,
+        documentId,
       });
 
       const activityId = res?.data?.id ?? res?.id;
