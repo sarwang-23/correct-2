@@ -741,8 +741,34 @@ export async function logoutSession(): Promise<void> {
   await requestJson('/auth/logout', { method: 'POST' }).catch(() => {});
 }
 
-export async function register(_payload: { username: string; email: string; password: string }): Promise<AuthResponse> {
-  return { success: false, data: { user: {} as AuthUser, token: '' }, message: 'Account creation is managed by the administrator.' };
+export async function register(payload: { username: string; email: string; password: string; tenantId?: string }): Promise<AuthResponse> {
+  const { ok, status, data } = await requestJson('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+  if (!ok) {
+    return {
+      success: false,
+      data: { user: {} as AuthUser, token: '' },
+      message: extractApiErrorMessage(data, `Registration failed (${status})`),
+    };
+  }
+
+  const inner = (data?.data ?? data) as { token: string; user: Record<string, unknown> };
+  const user: AuthUser = {
+    ...(inner.user as any),
+    username: ((inner.user?.name ?? inner.user?.email) as string) ?? '',
+    tenantId: inner.user?.tenantId as string | null,
+    organisationId: inner.user?.tenantId as string | null,
+  };
+
+  if (inner.user?.tenantId && typeof window !== 'undefined') {
+    localStorage.setItem('tenantId', inner.user.tenantId as string);
+    localStorage.setItem('universityId', inner.user.tenantId as string);
+  }
+
+  return { success: true, data: { token: inner.token ?? '', user } };
 }
 // â”€â”€ Onboarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // The backend resolves the organisation from the authenticated user (JWT â†’
