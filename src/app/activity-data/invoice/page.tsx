@@ -378,12 +378,24 @@ export default function InvoiceUploadPage() {
             </div>
           )}
 
+          {/* Locked-period warning shown on the review stage */}
+          {isLocked && stage === "review" && (
+            <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <Warning size={18} className="text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800">
+                <strong>Reporting period is locked.</strong> You cannot add new activity data to a locked period.
+                Please go to <strong>Reporting Periods</strong> and open or create a new period first.
+              </p>
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
               <Warning size={18} className="text-red-500 shrink-0 mt-0.5" />
               <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
+
 
           {/* STAGE: Upload */}
           {stage === "upload" && (
@@ -602,11 +614,11 @@ export default function InvoiceUploadPage() {
                   </button>
                   <button
                     onClick={handleSave}
-                    disabled={saving}
+                    disabled={saving || isLocked}
                     className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-5 py-2.5 text-sm font-bold text-white shadow-md disabled:opacity-50"
                   >
                     <CheckCircle size={15} weight="bold" />
-                    {saving ? "Saving..." : "Save Activity"}
+                    {saving ? "Saving..." : isLocked ? "Period Locked" : "Save Activity"}
                   </button>
                 </div>
               </div>
