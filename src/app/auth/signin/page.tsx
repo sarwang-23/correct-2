@@ -256,7 +256,7 @@ export default function SignInPage() {
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   required
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                  placeholder="••••••••"
                   className="h-10.5 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-10 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition-all hover:border-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
                 />
                 <button
