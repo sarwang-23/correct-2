@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -44,8 +44,23 @@ export default function SignInPage() {
         return;
       }
       setAuth(res.data.token, res.data.user);
-      const destination = res.data.user?.organisationId ? '/dashboard' : '/onboarding';
+
+      // Check actual onboarding completion status from the backend.
+      // organisationId being set does not guarantee onboarding was finished.
+      let destination = '/dashboard';
+      try {
+        const { getOnboardingStatus } = await import('@/lib/api');
+        const onbStatus = await getOnboardingStatus();
+        if (onbStatus.kind === 'not-found') {
+          destination = '/onboarding';
+        }
+      } catch {
+        // If status check fails, fall back to organisationId heuristic
+        if (!res.data.user?.organisationId) destination = '/onboarding';
+      }
+
       router.push(destination);
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign in. Please try again.');
       setIsPending(false);
