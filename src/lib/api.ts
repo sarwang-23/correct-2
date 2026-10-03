@@ -184,12 +184,17 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const { ok, status, data } = await requestJson(endpoint, options);
 
   if (!ok) {
-    const error = new ApiError(
-      status === 401
-        ? extractApiErrorMessage(data, "Session expired. Please log in again.")
-        : extractApiErrorMessage(data, `API error: ${status}`),
-      status
-    );
+    let fallback: string;
+    if (status === 401) {
+      fallback = "Session expired. Please log in again.";
+    } else if (status === 403) {
+      fallback = "Access denied — the reporting period may be locked, or your account does not have permission to create activity data.";
+    } else if (status === 409) {
+      fallback = "A duplicate record already exists.";
+    } else {
+      fallback = `API error: ${status}`;
+    }
+    const error = new ApiError(extractApiErrorMessage(data, fallback), status);
     if (status === 401) {
       // Session is dead: clear the credentials so the app cannot keep issuing
       // doomed requests, and send the user back to sign-in.
